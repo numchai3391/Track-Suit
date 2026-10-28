@@ -1,0 +1,1811 @@
+```html
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบสำรวจไซส์เสื้อแทร็คสูท (Track Suit) - โรงเรียนแม่จันวิทยาคม</title>
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+  <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+  <link href="[https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap](https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap)" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+  <!-- Lucide Icons -->
+  <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #fef9c3;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #facc15;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #eab308;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/60 to-white text-slate-800 selection:bg-yellow-300 selection:text-slate-900">
+
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-yellow-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3.5">
+        <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-300 p-1 shadow-md border border-yellow-300 flex items-center justify-center overflow-hidden shrink-0">
+          <img
+            src="[https://img2.pic.in.th/logo-RGB-14ace013a990fead5.png](https://img2.pic.in.th/logo-RGB-14ace013a990fead5.png)"
+            alt="MWK Logo"
+            class="w-full h-full object-contain drop-shadow-sm"
+            onerror="this.onerror=null;this.src='[https://placehold.co/100x100/facc15/1e293b?text=MWK](https://placehold.co/100x100/facc15/1e293b?text=MWK)';"
+          />
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-yellow-400 text-slate-900 rounded-full shadow-2xs">
+              MWK Track Suit
+            </span>
+            <span id="syncStatusBadge" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              เชื่อมต่อ Google Sheet แล้ว
+            </span>
+          </div>
+          <h1 class="text-base sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+            ระบบสำรวจไซส์เสื้อแทร็คสูท (Track Suit)
+          </h1>
+          <p class="text-xs text-slate-500 hidden sm:block">
+            โรงเรียนแม่จันวิทยาคม • บันทึกและแสดงผลจาก Google Sheet แบบ Real-time
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center gap-2">
+        <div class="bg-yellow-100/90 p-1.5 rounded-2xl border border-yellow-200 flex items-center gap-1">
+          <button
+            id="tabSurveyBtn"
+            onclick="switchTab('survey')"
+            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-yellow-400 text-slate-900 shadow-sm"
+          >
+            <i data-lucide="shirt" class="w-4 h-4"></i>
+            <span>เลือกไซส์เสื้อ</span>
+          </button>
+          <button
+            id="tabSummaryBtn"
+            onclick="switchTab('summary')"
+            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-slate-700 hover:bg-yellow-200/60"
+          >
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>สรุปผลข้อมูล</span>
+            <span id="navBadgeCount" class="px-1.5 py-0.2 rounded-full text-[11px] bg-yellow-300/80 text-slate-900 font-bold">
+              0/136
+            </span>
+          </button>
+        </div>
+
+        <button
+          onclick="fetchFromGoogleSheet(true)"
+          title="รีเฟรชข้อมูลล่าสุดจาก Google Sheet"
+          class="p-2.5 rounded-xl border bg-yellow-50 border-yellow-300 text-yellow-800 hover:bg-yellow-100 transition-all cursor-pointer"
+        >
+          <i id="refreshIcon" data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+
+        <button
+          onclick="openModal('sheetModal')"
+          title="ข้อมูลการเชื่อมต่อ Google Sheet"
+          class="p-2.5 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer"
+        >
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    
+    <!-- Top Progress & Quick Stats Banner -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+      <!-- Shirt Preview Card -->
+      <div class="lg:col-span-5 bg-white rounded-3xl border border-yellow-200 shadow-sm overflow-hidden flex flex-col justify-between relative group">
+        <div class="p-5 pb-3 flex items-center justify-between border-b border-yellow-100 bg-gradient-to-r from-yellow-50/80 to-amber-50/40">
+          <div class="flex items-center gap-2.5">
+            <div class="p-2 rounded-xl bg-yellow-400 text-slate-900 shadow-2xs">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-sm sm:text-base">ตัวอย่างเสื้อแทร็คสูท (Track Suit)</h2>
+              <p class="text-xs text-slate-500">คลิกที่ภาพเพื่อขยายดูรายละเอียดเสื้อ</p>
+            </div>
+          </div>
+          <button
+            onclick="openModal('imagePreviewModal')"
+            class="flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-yellow-100 hover:bg-yellow-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+          >
+            <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+            ขยายภาพ
+          </button>
+        </div>
+
+        <div
+          onclick="openModal('imagePreviewModal')"
+          class="relative flex-1 min-h-[210px] sm:min-h-[240px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4 cursor-pointer overflow-hidden"
+        >
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.18),transparent_70%)]"></div>
+          <img
+            src="[https://img2.pic.in.th/-MWK.png](https://img2.pic.in.th/-MWK.png)"
+            alt="ตัวอย่างเสื้อแทร็คสูท MWK"
+            class="max-h-56 sm:max-h-64 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+            onerror="this.onerror=null;this.src='[https://placehold.co/600x400/1e293b/facc15?text=MWK+Track+Suit](https://placehold.co/600x400/1e293b/facc15?text=MWK+Track+Suit)';"
+          />
+          <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-xs text-yellow-300 text-[11px] font-medium px-2.5 py-1 rounded-lg border border-yellow-400/30 flex items-center gap-1">
+            <i data-lucide="zoom-in" class="w-3 h-3"></i> คลิกเพื่อดูภาพขนาดใหญ่
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-yellow-50/90 border-t border-yellow-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="ruler" class="w-3.5 h-3.5 text-amber-600"></i>
+              ตารางขนาดไซส์เสื้อ (S - 5XL)
+            </span>
+            <span class="text-[11px] text-slate-500">หน่วย: รอบอก (นิ้ว)</span>
+          </div>
+          <div id="topSizeMiniGrid" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 text-center"></div>
+        </div>
+      </div>
+
+      <!-- Overall Progress & Size Quick Summary -->
+      <div class="lg:col-span-7 bg-white rounded-3xl border border-yellow-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                Real-Time Progress
+              </span>
+              <h2 class="text-lg sm:text-xl font-bold text-slate-900 mt-1">
+                ภาพรวมการกรอกข้อมูลทั้งหมด
+              </h2>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <a
+                href="[https://docs.google.com/spreadsheets/d/1RekhTu3X_MCIfh6hVH6mYl6VFAGSDLJHpetd2DqJXK8/edit](https://docs.google.com/spreadsheets/d/1RekhTu3X_MCIfh6hVH6mYl6VFAGSDLJHpetd2DqJXK8/edit)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl transition-all"
+              >
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                <span>เปิด Google Sheet</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 3 Stat Cards -->
+          <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/80 rounded-2xl p-3.5 sm:p-4">
+              <div class="flex items-center justify-between text-slate-500 mb-1">
+                <span class="text-xs font-medium">บุคลากรทั้งหมด</span>
+                <i data-lucide="users" class="w-4 h-4 text-slate-600"></i>
+              </div>
+              <div class="text-xl sm:text-3xl font-extrabold text-slate-900">
+                <span id="statTotalCount">136</span> <span class="text-xs sm:text-sm font-normal text-slate-500">คน</span>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/70 border border-emerald-200 rounded-2xl p-3.5 sm:p-4">
+              <div class="flex items-center justify-between text-emerald-700 mb-1">
+                <span class="text-xs font-semibold">กรอกไซส์แล้ว</span>
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+              </div>
+              <div class="text-xl sm:text-3xl font-extrabold text-emerald-700">
+                <span id="statCompletedCount">0</span> <span class="text-xs sm:text-sm font-normal text-emerald-600">คน</span>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-amber-50 to-yellow-100/70 border border-yellow-300 rounded-2xl p-3.5 sm:p-4">
+              <div class="flex items-center justify-between text-amber-800 mb-1">
+                <span class="text-xs font-semibold">ยังไม่ได้กรอก</span>
+                <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
+              </div>
+              <div class="text-xl sm:text-3xl font-extrabold text-amber-700">
+                <span id="statPendingCount">136</span> <span class="text-xs sm:text-sm font-normal text-amber-700">คน</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-xs font-semibold">
+              <span class="text-slate-600">ความคืบหน้าการสำรวจไซส์เสื้อ</span>
+              <span id="statProgressPercent" class="text-slate-900 font-bold">0%</span>
+            </div>
+            <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-0.5">
+              <div
+                id="statProgressBar"
+                class="h-full bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-500 rounded-full transition-all duration-500"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Size Count Badges -->
+        <div class="pt-3 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-700">จำนวนเสื้อแยกตามไซส์ (รวมทั้งหมด):</span>
+            <button
+              onclick="switchTab('summary')"
+              class="text-xs font-semibold text-amber-700 hover:text-amber-900 flex items-center gap-0.5 cursor-pointer"
+            >
+              ดูตารางสรุปละเอียด <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div id="bannerSizeCountGrid" class="grid grid-cols-4 sm:grid-cols-8 gap-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: SURVEY VIEW -->
+    <section id="surveyViewSection" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Left Sidebar: Select Department -->
+      <div class="lg:col-span-4 bg-white rounded-3xl border border-yellow-200 shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-5 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-300 text-slate-900">
+          <div class="flex items-center gap-2.5">
+            <div class="p-2 rounded-xl bg-white/90 text-slate-900 shadow-xs">
+              <i data-lucide="building-2" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-800">Step 1</span>
+              <h3 class="text-base sm:text-lg font-extrabold leading-tight">
+                เลือกกลุ่มงาน / กลุ่มสาระฯ
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div id="departmentListContainer" class="p-3 space-y-1.5 max-h-[560px] overflow-y-auto custom-scrollbar"></div>
+      </div>
+
+      <!-- Right Area: Members in Selected Department -->
+      <div class="lg:col-span-8 bg-white rounded-3xl border border-yellow-200 shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-6 border-b border-yellow-100 bg-gradient-to-r from-yellow-50/70 via-white to-amber-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div id="currentDeptIcon" class="w-12 h-12 rounded-2xl bg-yellow-400 text-slate-900 flex items-center justify-center text-2xl shadow-xs shrink-0">
+              👔
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
+                  Step 2 • เลือกรายชื่อและระบุไซส์
+                </span>
+                <span id="currentDeptStatsText" class="text-xs font-semibold text-slate-500">
+                  กรอกแล้ว 0 จาก 6 คน
+                </span>
+              </div>
+              <h3 id="currentDeptTitle" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">
+                ฝ่ายบริหาร
+              </h3>
+            </div>
+          </div>
+
+          <!-- Search within department -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input
+              id="deptSearchInput"
+              type="text"
+              oninput="handleDeptSearch(this.value)"
+              placeholder="ค้นหาชื่อในกลุ่มนี้..."
+              class="w-full pl-9 pr-8 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 transition-all"
+            />
+            <button
+              id="clearDeptSearchBtn"
+              onclick="handleDeptSearch('')"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Member Cards Grid -->
+        <div class="p-4 sm:p-6">
+          <div id="memberCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SUMMARY DASHBOARD VIEW -->
+    <section id="summaryViewSection" class="hidden space-y-6">
+      <!-- Size Breakdown Cards -->
+      <div class="bg-white rounded-3xl border border-yellow-200 shadow-sm p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="p-3 rounded-2xl bg-yellow-400 text-slate-900 shadow-xs">
+              <i data-lucide="shirt" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                สรุปยอดรวมเสื้อแทร็คสูทแยกตามขนาดไซส์
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-500">
+                รวมจำนวนบุคลากรที่เลือกแล้วทั้งหมด <span id="summaryTotalSelectedText" class="font-bold text-emerald-600">0</span> ตัว จากทั้งหมด <span id="summaryTotalStaffText">136</span> คน
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              onclick="copyTableToClipboard()"
+              class="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 hover:bg-yellow-200 text-slate-900 px-3.5 py-2.5 rounded-xl border border-yellow-300 transition-all cursor-pointer"
+            >
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span>คัดลอกตารางวางใน Google Sheet</span>
+            </button>
+            <button
+              onclick="exportToCSV()"
+              class="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-yellow-400 px-3.5 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+            >
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>ดาวน์โหลด CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="summarySizeCardsGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3"></div>
+      </div>
+
+      <!-- Department Completion Summary -->
+      <div class="bg-white rounded-3xl border border-yellow-200 shadow-sm p-5 sm:p-6">
+        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+          <i data-lucide="building-2" class="w-5 h-5 text-amber-600"></i>
+          สรุปความคืบหน้าแยกตามกลุ่มงาน / กลุ่มสาระการเรียนรู้
+        </h3>
+        <div id="deptCompletionGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+      </div>
+
+      <!-- Detailed Member Status List & Filters (Read-Only) -->
+      <div class="bg-white rounded-3xl border border-yellow-200 shadow-sm overflow-hidden">
+        <div class="p-5 sm:p-6 border-b border-yellow-100 bg-gradient-to-r from-yellow-50/60 to-white space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <i data-lucide="filter" class="w-5 h-5 text-amber-600"></i>
+                ตารางตรวจสอบรายชื่อและสถานะการกรอกข้อมูล
+              </h3>
+              <p class="text-xs text-slate-500">
+                ตรวจสอบได้ทันทีว่าบุคลากรท่านใดกรอกข้อมูลแล้ว หรือยังไม่ได้กรอก พร้อมขนาดไซส์ที่เลือก
+              </p>
+            </div>
+
+            <!-- Filter Pills -->
+            <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <button
+                id="filterBtnAll"
+                onclick="setSummaryStatusFilter('all')"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-900 text-yellow-400 shadow-xs"
+              >
+                ทั้งหมด (136)
+              </button>
+              <button
+                id="filterBtnCompleted"
+                onclick="setSummaryStatusFilter('completed')"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-slate-600 hover:bg-white"
+              >
+                กรอกแล้ว (0)
+              </button>
+              <button
+                id="filterBtnPending"
+                onclick="setSummaryStatusFilter('pending')"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-slate-600 hover:bg-white"
+              >
+                ยังไม่กรอก (136)
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Dropdown Filters -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input
+                id="summarySearchInput"
+                type="text"
+                oninput="handleSummarySearch(this.value)"
+                placeholder="ค้นหาชื่อ-นามสกุล หรือกลุ่มสาระฯ..."
+                class="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-yellow-400"
+              />
+            </div>
+
+            <select
+              id="summaryDeptSelect"
+              onchange="handleSummaryDeptChange(this.value)"
+              class="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-yellow-400 font-medium text-slate-700"
+            >
+              <option value="all">ทุกกลุ่มงาน / กลุ่มสาระฯ (11 กลุ่ม)</option>
+            </select>
+
+            <select
+              id="summarySizeSelect"
+              onchange="handleSummarySizeChange(this.value)"
+              class="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-yellow-400 font-medium text-slate-700"
+            >
+              <option value="all">ทุกขนาดไซส์ (S - 5XL)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table (Read-only, no edit action column) -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <th class="py-3.5 px-4 w-16 text-center">ลำดับ</th>
+                <th class="py-3.5 px-4">ชื่อ - นามสกุล</th>
+                <th class="py-3.5 px-4">กลุ่มงาน / กลุ่มสาระฯ</th>
+                <th class="py-3.5 px-4 text-center">สถานะ</th>
+                <th class="py-3.5 px-4 text-center">ไซส์ที่เลือก</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: SELECT SIZE MODAL -->
+  <div id="sizeSelectModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-xl w-full border border-yellow-300 shadow-2xl overflow-hidden my-8">
+      <!-- Modal Header -->
+      <div class="p-5 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-300 text-slate-900 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-slate-900 text-yellow-400 flex items-center justify-center font-bold text-lg shadow-sm">
+            <i data-lucide="user-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span id="modalDeptName" class="text-[11px] font-bold uppercase tracking-wider bg-white/80 text-slate-900 px-2 py-0.5 rounded-md">
+              ฝ่ายบริหาร
+            </span>
+            <h3 id="modalPersonName" class="text-lg font-extrabold text-slate-900 mt-0.5">
+              นายธีระศักดิ์ โนชัย
+            </h3>
+          </div>
+        </div>
+        <button
+          onclick="closeModal('sizeSelectModal')"
+          class="p-2 rounded-xl bg-white/60 hover:bg-white text-slate-800 transition-colors cursor-pointer"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 sm:p-6 space-y-5">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="shirt" class="w-4 h-4 text-amber-600"></i>
+            เลือกขนาดไซส์เสื้อแทร็คสูท (S - 5XL)
+          </label>
+          <button
+            onclick="openModal('sizeTableModal')"
+            class="text-xs font-semibold text-amber-700 hover:underline flex items-center gap-1 cursor-pointer bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-xl border border-amber-200 transition-colors"
+          >
+            <i data-lucide="table" class="w-3.5 h-3.5"></i> ดูตารางไซส์
+          </button>
+        </div>
+
+        <!-- 8 Sizes Grid -->
+        <div id="modalSizesGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <button
+            id="modalDeleteBtn"
+            onclick="deleteSelectedPersonSize()"
+            class="hidden px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+          >
+            ล้างข้อมูลไซส์
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button
+              onclick="closeModal('sizeSelectModal')"
+              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              ยกเลิก
+            </button>
+            <button
+              id="modalSaveBtn"
+              onclick="saveSelectedPersonSize()"
+              class="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-slate-950 shadow-md transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>ยืนยันการเลือกไซส์</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 8-SIZE CHART TABLE MODAL (แสดงเฉพาะตาราง 8 ไซส์ ไม่ใช้ภาพตัวอย่างเสื้อ) -->
+  <div id="sizeTableModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-yellow-300">
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-300 text-slate-900 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-slate-900 text-yellow-400">
+            <i data-lucide="ruler" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base sm:text-lg text-slate-900">ตารางขนาดไซส์เสื้อแทร็คสูท (8 ไซส์)</h3>
+            <p class="text-xs text-slate-800">คลิกที่แถวตารางเพื่อเลือกไซส์ได้ทันที</p>
+          </div>
+        </div>
+        <button
+          onclick="closeModal('sizeTableModal')"
+          class="p-2 rounded-xl bg-white/70 hover:bg-white text-slate-900 transition-colors cursor-pointer"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 sm:p-6">
+        <div class="overflow-hidden rounded-2xl border border-yellow-200 shadow-xs">
+          <table class="w-full text-center border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-yellow-400 text-xs sm:text-sm font-bold">
+                <th class="py-3 px-4 border-r border-slate-700">ลำดับ</th>
+                <th class="py-3 px-4 border-r border-slate-700">ขนาดไซส์ (Size)</th>
+                <th class="py-3 px-4">รอบอก (นิ้ว)</th>
+              </tr>
+            </thead>
+            <tbody id="sizeChartTableBody" class="divide-y divide-yellow-100 text-sm"></tbody>
+          </table>
+        </div>
+
+        <div class="mt-5 flex justify-end">
+          <button
+            onclick="closeModal('sizeTableModal')"
+            class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-yellow-400 hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            ปิดตารางไซส์
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: IMAGE PREVIEW MODAL (สำหรับปุ่มขยายภาพหน้าแรก) -->
+  <div id="imagePreviewModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeModal('imagePreviewModal')">
+    <div class="bg-slate-900 border border-yellow-400/40 rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+      <div class="p-4 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between text-white">
+        <div class="flex items-center gap-2.5">
+          <img
+            src="[https://img2.pic.in.th/logo-RGB-14ace013a990fead5.png](https://img2.pic.in.th/logo-RGB-14ace013a990fead5.png)"
+            alt="Logo"
+            class="w-7 h-7 object-contain"
+          />
+          <span class="font-bold text-sm sm:text-base">
+            ตัวอย่างเสื้อแทร็คสูท (Track Suit) - โรงเรียนแม่จันวิทยาคม
+          </span>
+        </div>
+        <button
+          onclick="closeModal('imagePreviewModal')"
+          class="p-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 cursor-pointer"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-950">
+        <img
+          src="[https://img2.pic.in.th/-MWK.png](https://img2.pic.in.th/-MWK.png)"
+          alt="Track Suit Preview Large"
+          class="max-h-[70vh] w-auto object-contain rounded-xl"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: GOOGLE SHEET INFO & SYNC MODAL -->
+  <div id="sheetModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full border border-yellow-300 shadow-2xl overflow-hidden my-8">
+      <div class="p-5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-2xl bg-white/15">
+            <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-extrabold">เชื่อมต่อ Google Sheet เรียบร้อยแล้ว</h3>
+            <p class="text-xs text-emerald-100">
+              Sheet ID: 1RekhTu3X_MCIfh6hVH6mYl6VFAGSDLJHpetd2DqJXK8
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="closeModal('sheetModal')"
+          class="p-2 rounded-xl bg-white/15 hover:bg-white/25 text-white cursor-pointer"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 text-sm">
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="font-bold text-emerald-950 flex items-center gap-1.5">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+              สถานะการเชื่อมต่อ Google Apps Script Web App
+            </div>
+            <p class="text-xs text-emerald-700 mt-0.5">
+              ระบบฝังลิงก์ Web App เรียบร้อยแล้ว ทุกการเลือกไซส์จะถูกบันทึกไปยัง Google Sheet โดยอัตโนมัติ
+            </p>
+          </div>
+          <a
+            href="[https://docs.google.com/spreadsheets/d/1RekhTu3X_MCIfh6hVH6mYl6VFAGSDLJHpetd2DqJXK8/edit](https://docs.google.com/spreadsheets/d/1RekhTu3X_MCIfh6hVH6mYl6VFAGSDLJHpetd2DqJXK8/edit)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-xs"
+          >
+            <span>เปิด Google Sheet</span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700">
+            Google Apps Script Web App URL (ฝังในระบบแล้ว):
+          </label>
+          <input
+            id="gasUrlInput"
+            type="url"
+            readonly
+            value="[https://script.google.com/macros/s/AKfycbyhbA5CS4w5vPOMoobvSxRD-JVBq-zp-0xFdQlLCt8ih-Bck3q73JVDHshN6QLC2elMOQ/exec](https://script.google.com/macros/s/AKfycbyhbA5CS4w5vPOMoobvSxRD-JVBq-zp-0xFdQlLCt8ih-Bck3q73JVDHshN6QLC2elMOQ/exec)"
+            class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-300 rounded-xl text-slate-600 font-mono"
+          />
+          <div class="flex flex-wrap gap-2 pt-2">
+            <button
+              onclick="fetchFromGoogleSheet(true)"
+              class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              ดึงข้อมูลล่าสุดจาก Sheet เดี๋ยวนี้
+            </button>
+            <button
+              onclick="syncAllToGoogleSheet()"
+              class="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold text-xs rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+              ส่งข้อมูลทั้งหมดขึ้น Google Sheet
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs text-slate-500">
+            หรือคัดลอกข้อมูลตารางทั้งหมดไปวาง (Ctrl+V) ใน Google Sheet ได้โดยตรง:
+          </span>
+          <button
+            onclick="copyTableToClipboard()"
+            class="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-400 hover:bg-yellow-500 text-slate-950 px-4 py-2 rounded-xl cursor-pointer"
+          >
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            คัดลอกข้อมูลทั้งหมดสำหรับวางใน Sheet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 hidden">
+    <div id="toastBox" class="flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-bold bg-slate-900 text-yellow-400 border-yellow-400/40">
+      <i data-lucide="check" class="w-4 h-4"></i>
+      <span id="toastMessage">บันทึกข้อมูลสำเร็จ</span>
+    </div>
+  </div>
+
+  <!-- Application Script -->
+  <script>
+    const GOOGLE_SHEET_ID = '1RekhTu3X_MCIfh6hVH6mYl6VFAGSDLJHpetd2DqJXK8';
+    // ฝัง Web App URL ของผู้ใช้เป็นค่าเริ่มต้นโดยตรง
+    const DEFAULT_GAS_WEBAPP_URL = '[https://script.google.com/macros/s/AKfycbyhbA5CS4w5vPOMoobvSxRD-JVBq-zp-0xFdQlLCt8ih-Bck3q73JVDHshN6QLC2elMOQ/exec](https://script.google.com/macros/s/AKfycbyhbA5CS4w5vPOMoobvSxRD-JVBq-zp-0xFdQlLCt8ih-Bck3q73JVDHshN6QLC2elMOQ/exec)';
+    const STORAGE_KEY = 'mwk_tracksuit_records_v3';
+
+    const SHIRT_SIZES = [
+      { size: 'S', chest: 40 },
+      { size: 'M', chest: 42 },
+      { size: 'L', chest: 44 },
+      { size: 'XL', chest: 46 },
+      { size: '2XL', chest: 48 },
+      { size: '3XL', chest: 50 },
+      { size: '4XL', chest: 52 },
+      { size: '5XL', chest: 54 },
+    ];
+
+    const DEPARTMENTS_DATA = [
+      {
+        id: 'exec',
+        name: 'ฝ่ายบริหาร',
+        icon: '👔',
+        members: [
+          'นายธีระศักดิ์ โนชัย',
+          'นางสาวทัศนีย์ ศรีสวัสดิ์',
+          'นางอลิศลา ริยะสาร',
+          'นางสาววิลาวัลย์ ขันทะ',
+          'นายทัตเทพ จงอมรรัตน์',
+          'นายนำชัย หอมแก่นจัน'
+        ]
+      },
+      {
+        id: 'sci',
+        name: 'วิทยาศาสตร์และเทคโนโลยี',
+        icon: '🔬',
+        members: [
+          'นางธิดา จินะศรี',
+          'นางสาวภัทรนันท์ มูลสัน',
+          'นางปัทมภรณ์ ปัญญาวงค์',
+          'นางศุภาลัย ช่างศิลป์',
+          'นางสาวชนิสรา จิณะไชย',
+          'นายไพวุฒิ ขุนซาง',
+          'นางสาวสุมารินทร์ นิโรจน์',
+          'นายบดินทร์ โทเพชร',
+          'นางสาวเชษฐ์สุดา พิงคะสัน',
+          'นางสาวมรกต ทิพย์สุวรรณ',
+          'นางพรวิมล ไชยสุข',
+          'นางสาวชนาธิป ปะทะดวง',
+          'นางสาวเชษฐ์ธิดา พิงคะสัน',
+          'นางสาววีรวรรณ รินฤทธิ์',
+          'นางสาวธัญญาลักษณ์ ปาระมีสัก',
+          'นางเบญจมาส สิยะวณิช',
+          'นายศิวรา แสนสบาย',
+          'นางสาวนันทกานต์ สุวรรณโณ',
+          'นางสาวกุลญา คำแปง',
+          'นางศิรินภา เตียนต๊ะนันท์',
+          'นายพิทยุตม์ จุมปา',
+          'นางสาวพลอยนัดดา ผาบไชย',
+          'นายคณกร เฉียบแหลม',
+          'นายสิทธิพงษ์ คำมูลเมือง',
+          'นายสุริยัน สุทธิประภา'
+        ]
+      },
+      {
+        id: 'math',
+        name: 'คณิตศาสตร์',
+        icon: '📐',
+        members: [
+          'นางณฐมน ศรีภักดี',
+          'นางพัชรินทร์ มณี',
+          'นางสาวอัญชลี ประวัง',
+          'นางสาวสุภารัตน์ เลาเหล็ก',
+          'นางสาวเปรมกมล อินหลี',
+          'นางกรรณิกา ติ๊บมณี',
+          'นางสาวธีรรักษ์ หาญสกุล',
+          'นางสาวเกศรา หน่อแก้ว',
+          'นางสาวพศิกา ปลุกเสก',
+          'นายคมศร ขันตี',
+          'นางสิริวัชญา จันทะคุณ',
+          'นายภากร อุปธิ',
+          'นายธัญธร ธรรมวงค์',
+          'นางสาวชนัดดา สุกัณทา',
+          'นายชนกันต์ ทวีพนารักษ์'
+        ]
+      },
+      {
+        id: 'fl',
+        name: 'ภาษาต่างประเทศ (Foreign Languages Department)',
+        icon: '🌏',
+        members: [
+          'นางณัฐมล เชยบาน',
+          'นางสาวอารีย์ กองแก้ว',
+          'นางสาววรัญญา จันทร์ธีระโรจน์',
+          'นางปิยธิดา ปินตาแก้ว',
+          'นายธิติพงศ์ ชมภู',
+          'นางสาวรุ่งนภา ดอนเงิน',
+          'นางมัลลิกา ไชยชุมศักดิ์',
+          'นางสาวจิ่งหลี่ แซ่สิ่ว',
+          'นางสาวอัชฌาดา สวนเขื่อน',
+          'นางกนิษฐา ศิรบรรจงกราน',
+          'นางสาวปทุม ใจอากะ',
+          'นายอรรถพล พิทักษ์',
+          'นายธนฤทธิ มงคลโรจน์กุล',
+          'นางสาวนิตยา ปันศิล',
+          'นายธนกร อริเดช',
+          'นางสาวรัชดาพร กลอนสัน',
+          'นางสาวมณธิชา สิทธิยศ',
+          'นางสาวจิตรา กันทะเขียว',
+          'นางสาวกวิสรา มีธรรม',
+          'นางสาวสุพัชญา แก้วนารี',
+          'Mr. Karl Jerome Sarmiento Zapanta',
+          'Miss Hazel Faye Yway Pabualan',
+          'Mr. Mel Joshua Enomar Fuentes',
+          'Miss Ana Maria Larlar Lopez'
+        ]
+      },
+      {
+        id: 'thai',
+        name: 'ภาษาไทย',
+        icon: '📖',
+        members: [
+          'นายปารมี วชิรปทุมมุตต์',
+          'นางเบญจพร สันตา',
+          'นางกมลรัตน์ คำโมนะ',
+          'นางสาวอาณดา อ่อนน้อม',
+          'นายเฉลิมพล ทรายหมอ',
+          'นางสาวเณชญา เสี่ยงกุศล',
+          'นางสาวกนกวรรณ ทองคำ',
+          'นางสาวณัฐวินี ตาสาย',
+          'นางสาวกมลพร สีมาชัย',
+          'นางสาวฐิติมา ทนไธสง',
+          'นางสาววิชชุตา จันต๊ะคาด'
+        ]
+      },
+      {
+        id: 'career',
+        name: 'การงานอาชีพ',
+        icon: '🛠️',
+        members: [
+          'นายนิกร ชัยชนะพงษ์',
+          'นางสาวกัลย์สุดา ขันแก้วมิ่ง',
+          'นายภูดินันท์ รอดเกิด',
+          'นายจตุพร มากด่าน',
+          'นายสุพจน์ พึ่งวงค์',
+          'นางสาววรินทร กาบสนิท',
+          'นางวิลาวัลย์ วิเศษโวหาร',
+          'นางสาวศิริเพ็ญ ดอนน้อยหน่า',
+          'นางธัญพิมล สุวรรณศร',
+          'นางขวัญวิไล บุญยอด',
+          'นางสาวพิชญา ติ๊บหน่อ',
+          'นายพงษ์สิทธิ์ นันทญา',
+          'นางสาวกาญจนา เกตุอินทร์',
+          'นายอานันท์ อะภิวัน'
+        ]
+      },
+      {
+        id: 'art',
+        name: 'ศิลปะ',
+        icon: '🎨',
+        members: [
+          'นายเทศนิต เจริญปัญญาเนตร',
+          'นายสมศักดิ์ ช่างศิลป์',
+          'นางสุกันยา อินทิม',
+          'นางสาวเบญจพร จันทวิกสิทธิ์',
+          'นายภูมินทร์ สุวรรณศรี',
+          'นางสาวอวยพร อารีโกเศศ',
+          'นายวัฒน ลาพิงค์',
+          'นายณัฐวัฒน์ ร่วมชาติ',
+          'นายวรวุฒน์ อุดนัน',
+          'นางสาวพิมพ์พิจิตร ศรีสงค์ใจ',
+          'นางสาวสาวิตรี ฤทธิ์บูรณ์',
+          'นางสาววราภรณ์ หงษา'
+        ]
+      },
+      {
+        id: 'soc',
+        name: 'สังคมศึกษาฯ',
+        icon: '🏛️',
+        members: [
+          'นางสาวนฤมล สารขัติ',
+          'นางทิพวรรณ บุญหวาน',
+          'นายเรืองโรจน์ กลิ่นหอม',
+          'นางสาวศุทธ์นัชชา สารนันต์',
+          'นางสาวมัลลิกา วงศ์เรือง',
+          'นายเทพประทาน พึ่งศาสตร์',
+          'นางสาวนิศารัตน์ ฟองสมุทร',
+          'นายเอก กีณณเกชยางค์กูร',
+          'นางสาวชนิภรณ์ บุญแก้ว',
+          'นายสนธยา อินทัฏฐาน์',
+          'นางสาวธนพร ฉลอม',
+          'นายกฤษณะ จันทร์เต็ม',
+          'นายกฤษณะ ทาทอง',
+          'นางสาวนฤมล สิงห์กวาง'
+        ]
+      },
+      {
+        id: 'guide',
+        name: 'แนะแนว',
+        icon: '🧭',
+        members: [
+          'นางสาวจันทร์เพ็ญ ไทยใหม่',
+          'นางกานดา ชุมภูวิเศษ',
+          'นางสาวศิริขวัญ มูลชนะ',
+          'นางสาวบุณยาพร สมจิตร'
+        ]
+      },
+      {
+        id: 'pe',
+        name: 'สุขศึกษาฯ',
+        icon: '⚽',
+        members: [
+          'นายนิธิภัทร พรมมา',
+          'นายเทวราช กรกฏกำจร',
+          'นายสมชาย สมบูรณ์',
+          'นายบุญเสริฐ งามขำ',
+          'นายวุฒิเดช รัญชนานนท์',
+          'นายทฤษฎี ปัญญาจิตกร',
+          'นายพลากร นันทเสน',
+          'นายอุทัย อิสยาห์กุล',
+          'นายจักรพันธ์ ศรีมาปัน'
+        ]
+      },
+      {
+        id: 'lib',
+        name: 'บรรณารักษ์',
+        icon: '📚',
+        members: [
+          'นางสาวธัชกร จับใจนาย',
+          'นางสาววรัทณัฐกร อัตมะ'
+        ]
+      }
+    ];
+
+    // Flatten All Staff
+    const ALL_STAFF = [];
+    let globalOrderCounter = 1;
+    DEPARTMENTS_DATA.forEach(dept => {
+      dept.members.forEach((name, idx) => {
+        ALL_STAFF.push({
+          id: `${dept.id}_${idx + 1}`,
+          globalOrder: globalOrderCounter++,
+          no: idx + 1,
+          name: name.trim(),
+          deptId: dept.id,
+          deptName: dept.name,
+          deptIcon: dept.icon
+        });
+      });
+    });
+
+    // App State
+    let activeTab = 'survey';
+    let selectedDeptId = 'exec';
+    let deptSearchQuery = '';
+    let summaryStatusFilter = 'all';
+    let summaryDeptFilter = 'all';
+    let summarySizeFilter = 'all';
+    let summarySearchQuery = '';
+
+    let activeModalPerson = null;
+    let tempSelectedSize = '';
+    let records = {}; // { [personId]: { size, chest, updatedAt } }
+    let gasWebAppUrl = DEFAULT_GAS_WEBAPP_URL;
+
+    // Initialize
+    function initApp() {
+      // Load local cache first for instant rendering
+      const savedRecords = localStorage.getItem(STORAGE_KEY);
+      if (savedRecords) {
+        try {
+          records = JSON.parse(savedRecords);
+        } catch (e) {
+          records = {};
+        }
+      }
+
+      renderTopMiniSizeGrid();
+      populateSummaryDropdowns();
+      renderAll();
+      lucide.createIcons();
+
+      // ดึงข้อมูลจาก Google Sheet ทันทีเมื่อเปิดเว็บ
+      fetchFromGoogleSheet(false);
+
+      // อัปเดตข้อมูลอัตโนมัติทุกๆ 30 วินาที เพื่อให้ทุกเครื่องเห็นตรงกัน
+      setInterval(() => {
+        fetchFromGoogleSheet(false);
+      }, 30000);
+    }
+
+    function saveRecordsToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function setSyncBadge(statusText, isOnline = true) {
+      const badge = document.getElementById('syncStatusBadge');
+      if (!badge) return;
+      if (isOnline) {
+        badge.className = 'inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${statusText}`;
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200';
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> ${statusText}`;
+      }
+    }
+
+    // ดึงข้อมูลจาก Google Sheet ผ่าน Web App URL
+    async function fetchFromGoogleSheet(showNotification = false) {
+      if (!gasWebAppUrl) return;
+      const refreshIcon = document.getElementById('refreshIcon');
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+      setSyncBadge('กำลังซิงค์ข้อมูล...', false);
+
+      try {
+        const res = await fetch(`${gasWebAppUrl}?action=getAll&t=${Date.now()}`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+        const data = await res.json();
+        if (data && data.records) {
+          records = data.records;
+          saveRecordsToStorage();
+          renderAll();
+          setSyncBadge('ซิงค์ Google Sheet ล่าสุดแล้ว', true);
+          if (showNotification) {
+            showToast('ดึงข้อมูลล่าสุดจาก Google Sheet เรียบร้อยแล้ว');
+          }
+        }
+      } catch (err) {
+        console.warn('Google Sheet fetch warning:', err);
+        setSyncBadge('โหมดสำรองข้อมูลในเครื่อง', true);
+        if (showNotification) {
+          showToast('ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ในขณะนี้');
+        }
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+      }
+    }
+
+    // ส่งข้อมูลทั้งหมดขึ้น Google Sheet
+    async function syncAllToGoogleSheet() {
+      if (!gasWebAppUrl) return;
+      setSyncBadge('กำลังส่งข้อมูลขึ้น Sheet...', false);
+      showToast('กำลังส่งข้อมูลทั้งหมดไปยัง Google Sheet...');
+
+      const rows = ALL_STAFF.map(person => {
+        const rec = records[person.id];
+        return {
+          id: person.id,
+          no: person.no,
+          name: person.name,
+          deptName: person.deptName,
+          size: rec ? rec.size : '',
+          chest: rec ? rec.chest : '',
+          updatedAt: rec ? rec.updatedAt : ''
+        };
+      });
+
+      try {
+        await fetch(gasWebAppUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'syncAll',
+            sheetId: GOOGLE_SHEET_ID,
+            rows: rows
+          })
+        });
+        setSyncBadge('เชื่อมต่อ Google Sheet แล้ว', true);
+        showToast('ส่งข้อมูลทั้งหมดไปยัง Google Sheet สำเร็จ');
+      } catch (e) {
+        showToast('เกิดข้อผิดพลาดในการส่งข้อมูล');
+      }
+    }
+
+    // Render Top Shirt Size Reference Grid
+    function renderTopMiniSizeGrid() {
+      const container = document.getElementById('topSizeMiniGrid');
+      container.innerHTML = SHIRT_SIZES.map(item => `
+        <div class="bg-white rounded-xl py-1.5 px-1 border border-yellow-200 shadow-2xs">
+          <div class="text-xs font-extrabold text-slate-900">${item.size}</div>
+          <div class="text-[11px] font-medium text-amber-700">${item.chest}"</div>
+        </div>
+      `).join('');
+    }
+
+    // Populate Dropdowns in Summary Tab
+    function populateSummaryDropdowns() {
+      const deptSelect = document.getElementById('summaryDeptSelect');
+      deptSelect.innerHTML = `<option value="all">ทุกกลุ่มงาน / กลุ่มสาระฯ (${DEPARTMENTS_DATA.length} กลุ่ม)</option>` +
+        DEPARTMENTS_DATA.map(d => `<option value="${d.id}">${d.name} (${d.members.length} คน)</option>`).join('');
+
+      const sizeSelect = document.getElementById('summarySizeSelect');
+      sizeSelect.innerHTML = `<option value="all">ทุกขนาดไซส์ (S - 5XL)</option>` +
+        SHIRT_SIZES.map(s => `<option value="${s.size}">ไซส์ ${s.size} (รอบอก ${s.chest} นิ้ว)</option>`).join('');
+    }
+
+    // Calculate Stats
+    function getStatistics() {
+      const total = ALL_STAFF.length;
+      let completed = 0;
+      const sizeCounts = {};
+      SHIRT_SIZES.forEach(s => { sizeCounts[s.size] = 0; });
+
+      const deptStats = {};
+      DEPARTMENTS_DATA.forEach(d => {
+        deptStats[d.id] = { total: d.members.length, completed: 0 };
+      });
+
+      ALL_STAFF.forEach(person => {
+        const rec = records[person.id];
+        if (rec && rec.size) {
+          completed++;
+          if (sizeCounts[rec.size] !== undefined) {
+            sizeCounts[rec.size]++;
+          }
+          if (deptStats[person.deptId]) {
+            deptStats[person.deptId].completed++;
+          }
+        }
+      });
+
+      const pending = total - completed;
+      const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      return { total, completed, pending, progressPercent, sizeCounts, deptStats };
+    }
+
+    // Render Everything
+    function renderAll() {
+      const stats = getStatistics();
+
+      // Update Top Stats & Navbar Badge
+      document.getElementById('navBadgeCount').textContent = `${stats.completed}/${stats.total}`;
+      document.getElementById('statTotalCount').textContent = stats.total;
+      document.getElementById('statCompletedCount').textContent = stats.completed;
+      document.getElementById('statPendingCount').textContent = stats.pending;
+      document.getElementById('statProgressPercent').textContent = `${stats.progressPercent}%`;
+      document.getElementById('statProgressBar').style.width = `${stats.progressPercent}%`;
+
+      // Update Banner Size Count Grid
+      const bannerGrid = document.getElementById('bannerSizeCountGrid');
+      bannerGrid.innerHTML = SHIRT_SIZES.map(s => {
+        const count = stats.sizeCounts[s.size] || 0;
+        const activeClass = count > 0
+          ? 'bg-yellow-50/90 border-yellow-300 text-slate-900 shadow-2xs'
+          : 'bg-slate-50 border-slate-200/70 text-slate-400';
+        const countClass = count > 0 ? 'text-amber-600' : 'text-slate-400';
+        return `
+          <div class="rounded-xl p-2 border text-center transition-all ${activeClass}">
+            <div class="text-xs font-bold">${s.size} <span class="text-[10px] font-normal text-slate-500">(${s.chest}")</span></div>
+            <div class="text-base sm:text-lg font-extrabold ${countClass}">
+              ${count} <span class="text-[10px] font-normal">ตัว</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderDepartmentSidebar(stats);
+      renderDepartmentMembers(stats);
+      renderSummaryView(stats);
+      lucide.createIcons();
+    }
+
+    // Render Left Department List
+    function renderDepartmentSidebar(stats) {
+      const container = document.getElementById('departmentListContainer');
+      container.innerHTML = DEPARTMENTS_DATA.map(dept => {
+        const dStat = stats.deptStats[dept.id] || { total: dept.members.length, completed: 0 };
+        const isSelected = selectedDeptId === dept.id;
+        const isAllDone = dStat.completed === dStat.total && dStat.total > 0;
+
+        const btnClass = isSelected
+          ? 'bg-slate-900 text-white shadow-md'
+          : 'hover:bg-yellow-50 text-slate-700';
+
+        const badgeClass = isAllDone
+          ? 'bg-emerald-500 text-white'
+          : isSelected
+          ? 'bg-yellow-400 text-slate-900'
+          : 'bg-slate-100 text-slate-700';
+
+        return `
+          <button
+            onclick="selectDepartment('${dept.id}')"
+            class="w-full text-left p-3 rounded-2xl transition-all flex items-center justify-between gap-2 cursor-pointer ${btnClass}"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-xl shrink-0">${dept.icon}</span>
+              <div class="truncate">
+                <div class="font-bold text-sm truncate ${isSelected ? 'text-yellow-300' : 'text-slate-800'}">
+                  ${dept.name}
+                </div>
+                <div class="text-[11px] ${isSelected ? 'text-slate-300' : 'text-slate-500'}">
+                  ทั้งหมด ${dStat.total} คน
+                </div>
+              </div>
+            </div>
+            <div class="shrink-0 flex items-center gap-1.5">
+              <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold ${badgeClass}">
+                ${dStat.completed}/${dStat.total}
+              </span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Render Members in Right Panel
+    function renderDepartmentMembers(stats) {
+      const currentDept = DEPARTMENTS_DATA.find(d => d.id === selectedDeptId) || DEPARTMENTS_DATA[0];
+      const dStat = stats.deptStats[currentDept.id] || { total: currentDept.members.length, completed: 0 };
+
+      document.getElementById('currentDeptIcon').textContent = currentDept.icon;
+      document.getElementById('currentDeptTitle').textContent = currentDept.name;
+      document.getElementById('currentDeptStatsText').textContent = `กรอกแล้ว ${dStat.completed} จาก ${dStat.total} คน`;
+
+      const members = ALL_STAFF.filter(p => {
+        if (p.deptId !== selectedDeptId) return false;
+        if (!deptSearchQuery.trim()) return true;
+        return p.name.toLowerCase().includes(deptSearchQuery.trim().toLowerCase());
+      });
+
+      const grid = document.getElementById('memberCardsGrid');
+      if (members.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <p class="text-slate-500 font-medium text-sm">ไม่พบรายชื่อที่ค้นหาในกลุ่มนี้</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = members.map(person => {
+        const rec = records[person.id];
+        const hasSize = rec && rec.size;
+        const sizeObj = hasSize ? SHIRT_SIZES.find(s => s.size === rec.size) : null;
+
+        const cardClass = hasSize
+          ? 'bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30 border-emerald-300 hover:border-emerald-400'
+          : 'bg-white border-slate-200/90 hover:border-yellow-400 hover:bg-yellow-50/20';
+
+        const numBadgeClass = hasSize
+          ? 'bg-emerald-600 text-white'
+          : 'bg-yellow-100 text-amber-900 group-hover:bg-yellow-400 group-hover:text-slate-900';
+
+        return `
+          <div
+            onclick="openPersonSizeModal('${person.id}')"
+            class="group relative rounded-2xl p-4 border transition-all cursor-pointer flex items-center justify-between gap-3 shadow-2xs hover:shadow-md ${cardClass}"
+          >
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${numBadgeClass}">
+                ${person.no}
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-sm sm:text-base truncate">
+                  ${person.name}
+                </div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  ${hasSize ? `
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+                      <i data-lucide="check-circle-2" class="w-3 h-3"></i> เลือกไซส์แล้ว
+                    </span>
+                  ` : `
+                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600">
+                      <i data-lucide="clock" class="w-3 h-3"></i> คลิกเพื่อเลือกไซส์เสื้อ
+                    </span>
+                  `}
+                </div>
+              </div>
+            </div>
+
+            <div class="shrink-0">
+              ${hasSize ? `
+                <div class="flex items-center gap-2">
+                  <div class="px-3 py-1.5 rounded-xl bg-slate-900 text-yellow-400 font-extrabold text-sm shadow-xs text-center min-w-[60px]">
+                    <div>${rec.size}</div>
+                    <div class="text-[10px] font-normal text-yellow-200">อก ${sizeObj ? sizeObj.chest : rec.chest}"</div>
+                  </div>
+                  <div class="p-1.5 rounded-lg text-slate-400 group-hover:text-slate-700 group-hover:bg-slate-100">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </div>
+                </div>
+              ` : `
+                <span class="px-3.5 py-2 rounded-xl bg-yellow-400 group-hover:bg-yellow-500 text-slate-900 font-bold text-xs shadow-2xs transition-colors inline-block">
+                  เลือกไซส์
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Summary View
+    function renderSummaryView(stats) {
+      document.getElementById('summaryTotalSelectedText').textContent = stats.completed;
+      document.getElementById('summaryTotalStaffText').textContent = stats.total;
+
+      // 1. Render 8 Size Cards
+      const sizeCardsGrid = document.getElementById('summarySizeCardsGrid');
+      sizeCardsGrid.innerHTML = SHIRT_SIZES.map(item => {
+        const count = stats.sizeCounts[item.size] || 0;
+        const pct = stats.completed > 0 ? Math.round((count / stats.completed) * 100) : 0;
+        const cardStyle = count > 0
+          ? 'bg-gradient-to-b from-yellow-50/90 to-white border-yellow-400 shadow-xs'
+          : 'bg-slate-50/70 border-slate-200 opacity-75';
+
+        return `
+          <div class="rounded-2xl p-3.5 border transition-all flex flex-col justify-between ${cardStyle}">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900 text-yellow-400 font-extrabold text-sm">
+                ${item.size}
+              </span>
+              <span class="text-[11px] font-semibold text-slate-500">
+                อก ${item.chest}"
+              </span>
+            </div>
+            <div class="my-3 text-center">
+              <div class="text-2xl sm:text-3xl font-black text-slate-900">
+                ${count}
+              </div>
+              <div class="text-[11px] font-medium text-slate-500">ตัว (${pct}%)</div>
+            </div>
+            <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 2. Render Department Completion Grid
+      const deptGrid = document.getElementById('deptCompletionGrid');
+      deptGrid.innerHTML = DEPARTMENTS_DATA.map(dept => {
+        const st = stats.deptStats[dept.id] || { total: dept.members.length, completed: 0 };
+        const pct = st.total > 0 ? Math.round((st.completed / st.total) * 100) : 0;
+        const isDone = st.completed === st.total;
+
+        return `
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between gap-2">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-lg">${dept.icon}</span>
+                <span class="font-bold text-xs sm:text-sm text-slate-800 truncate">${dept.name}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-lg text-xs font-extrabold shrink-0 ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">
+                ${st.completed}/${st.total}
+              </span>
+            </div>
+            <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full rounded-full ${isDone ? 'bg-emerald-500' : 'bg-yellow-400'}" style="width: ${pct}%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500">
+              <span>กรอกแล้ว ${st.completed} คน</span>
+              <span>คงเหลือ ${st.total - st.completed} คน</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 3. Update Filter Pill Counts
+      const btnAll = document.getElementById('filterBtnAll');
+      const btnCompleted = document.getElementById('filterBtnCompleted');
+      const btnPending = document.getElementById('filterBtnPending');
+
+      btnAll.textContent = `ทั้งหมด (${stats.total})`;
+      btnCompleted.textContent = `กรอกแล้ว (${stats.completed})`;
+      btnPending.textContent = `ยังไม่กรอก (${stats.pending})`;
+
+      btnAll.className = summaryStatusFilter === 'all'
+        ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-900 text-yellow-400 shadow-xs'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-slate-600 hover:bg-white';
+
+      btnCompleted.className = summaryStatusFilter === 'completed'
+        ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-emerald-600 text-white shadow-xs'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-slate-600 hover:bg-white';
+
+      btnPending.className = summaryStatusFilter === 'pending'
+        ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-amber-500 text-slate-950 shadow-xs'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-slate-600 hover:bg-white';
+
+      // 4. Filter & Render Table Rows (Read-only)
+      const filteredStaff = ALL_STAFF.filter(person => {
+        const rec = records[person.id];
+        const isCompleted = Boolean(rec && rec.size);
+
+        if (summaryStatusFilter === 'completed' && !isCompleted) return false;
+        if (summaryStatusFilter === 'pending' && isCompleted) return false;
+        if (summaryDeptFilter !== 'all' && person.deptId !== summaryDeptFilter) return false;
+        if (summarySizeFilter !== 'all' && (!rec || rec.size !== summarySizeFilter)) return false;
+
+        if (summarySearchQuery.trim()) {
+          const q = summarySearchQuery.trim().toLowerCase();
+          return person.name.toLowerCase().includes(q) || person.deptName.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      const tbody = document.getElementById('summaryTableBody');
+      if (filteredStaff.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-12 text-center text-slate-400">
+              ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredStaff.map((person, idx) => {
+        const rec = records[person.id];
+        const hasSize = Boolean(rec && rec.size);
+        const sizeObj = hasSize ? SHIRT_SIZES.find(s => s.size === rec.size) : null;
+
+        return `
+          <tr class="hover:bg-yellow-50/40 transition-colors">
+            <td class="py-3 px-4 text-center font-semibold text-slate-400">
+              ${idx + 1}
+            </td>
+            <td class="py-3 px-4 font-bold text-slate-900">
+              ${person.name}
+            </td>
+            <td class="py-3 px-4 text-slate-600">
+              <span class="inline-flex items-center gap-1.5 text-xs font-medium bg-slate-100 px-2.5 py-1 rounded-lg">
+                <span>${person.deptIcon}</span>
+                <span>${person.deptName}</span>
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${hasSize ? `
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> กรอกแล้ว
+                </span>
+              ` : `
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่กรอก
+                </span>
+              `}
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${hasSize ? `
+                <span class="inline-block px-3 py-1 rounded-lg bg-slate-900 text-yellow-400 font-extrabold text-xs">
+                  ${rec.size} (${sizeObj ? sizeObj.chest : rec.chest}")
+                </span>
+              ` : `
+                <span class="text-slate-300">-</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Navigation & Filtering Handlers
+    function switchTab(tab) {
+      activeTab = tab;
+      const surveySection = document.getElementById('surveyViewSection');
+      const summarySection = document.getElementById('summaryViewSection');
+      const tabSurveyBtn = document.getElementById('tabSurveyBtn');
+      const tabSummaryBtn = document.getElementById('tabSummaryBtn');
+
+      if (tab === 'survey') {
+        surveySection.classList.remove('hidden');
+        summarySection.classList.add('hidden');
+        tabSurveyBtn.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-yellow-400 text-slate-900 shadow-sm';
+        tabSummaryBtn.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-slate-700 hover:bg-yellow-200/60';
+      } else {
+        surveySection.classList.add('hidden');
+        summarySection.classList.remove('hidden');
+        tabSurveyBtn.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-slate-700 hover:bg-yellow-200/60';
+        tabSummaryBtn.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-yellow-400 text-slate-900 shadow-sm';
+      }
+      renderAll();
+    }
+
+    function selectDepartment(deptId) {
+      selectedDeptId = deptId;
+      handleDeptSearch('');
+      renderAll();
+    }
+
+    function handleDeptSearch(val) {
+      deptSearchQuery = val;
+      const input = document.getElementById('deptSearchInput');
+      const clearBtn = document.getElementById('clearDeptSearchBtn');
+      if (input.value !== val) input.value = val;
+      if (val.trim()) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderAll();
+    }
+
+    function setSummaryStatusFilter(status) {
+      summaryStatusFilter = status;
+      renderAll();
+    }
+
+    function handleSummarySearch(val) {
+      summarySearchQuery = val;
+      renderAll();
+    }
+
+    function handleSummaryDeptChange(val) {
+      summaryDeptFilter = val;
+      renderAll();
+    }
+
+    function handleSummarySizeChange(val) {
+      summarySizeFilter = val;
+      renderAll();
+    }
+
+    // Modal Operations
+    function openPersonSizeModal(personId) {
+      const person = ALL_STAFF.find(p => p.id === personId);
+      if (!person) return;
+
+      activeModalPerson = person;
+      const existing = records[person.id];
+      tempSelectedSize = existing ? existing.size : '';
+
+      document.getElementById('modalDeptName').textContent = person.deptName;
+      document.getElementById('modalPersonName').textContent = person.name;
+
+      const deleteBtn = document.getElementById('modalDeleteBtn');
+      if (existing && existing.size) {
+        deleteBtn.classList.remove('hidden');
+      } else {
+        deleteBtn.classList.add('hidden');
+      }
+
+      renderModalSizeButtons();
+      renderSizeChartTable();
+      openModal('sizeSelectModal');
+    }
+
+    function renderModalSizeButtons() {
+      const grid = document.getElementById('modalSizesGrid');
+      grid.innerHTML = SHIRT_SIZES.map(item => {
+        const isSelected = tempSelectedSize === item.size;
+        const btnClass = isSelected
+          ? 'bg-slate-900 border-slate-900 text-yellow-400 shadow-lg scale-[1.02]'
+          : 'bg-yellow-50/50 border-yellow-200 hover:border-yellow-400 text-slate-800 hover:bg-yellow-50';
+
+        return `
+          <button
+            type="button"
+            onclick="selectTempSize('${item.size}')"
+            class="p-3 rounded-2xl border-2 text-center transition-all cursor-pointer flex flex-col items-center justify-center relative ${btnClass}"
+          >
+            ${isSelected ? `<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-yellow-400"></span>` : ''}
+            <span class="text-lg font-black tracking-tight">${item.size}</span>
+            <span class="text-xs font-medium mt-0.5 ${isSelected ? 'text-yellow-200' : 'text-slate-500'}">
+              รอบอก ${item.chest}"
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      const saveBtn = document.getElementById('modalSaveBtn');
+      saveBtn.disabled = !tempSelectedSize;
+      if (!tempSelectedSize) {
+        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    function renderSizeChartTable() {
+      const tbody = document.getElementById('sizeChartTableBody');
+      tbody.innerHTML = SHIRT_SIZES.map((item, index) => {
+        const isSelected = tempSelectedSize === item.size;
+        const rowClass = isSelected
+          ? 'bg-yellow-100 font-bold text-slate-900'
+          : 'hover:bg-yellow-50/80 text-slate-700';
+
+        return `
+          <tr
+            onclick="selectSizeFromChart('${item.size}')"
+            class="cursor-pointer transition-colors ${rowClass}"
+          >
+            <td class="py-2.5 px-4 border-r border-yellow-100">${index + 1}</td>
+            <td class="py-2.5 px-4 border-r border-yellow-100 font-extrabold text-slate-900">
+              <span class="px-2.5 py-0.5 rounded-lg ${isSelected ? 'bg-slate-900 text-yellow-400' : 'bg-yellow-200/70 text-slate-900'}">
+                ${item.size}
+              </span>
+            </td>
+            <td class="py-2.5 px-4 font-semibold text-amber-900">${item.chest} นิ้ว</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function selectTempSize(size) {
+      tempSelectedSize = size;
+      renderModalSizeButtons();
+      renderSizeChartTable();
+    }
+
+    function selectSizeFromChart(size) {
+      tempSelectedSize = size;
+      renderModalSizeButtons();
+      renderSizeChartTable();
+      closeModal('sizeTableModal');
+      showToast(`เลือกขนาดไซส์ ${size} แล้ว`);
+    }
+
+    async function saveSelectedPersonSize() {
+      if (!activeModalPerson || !tempSelectedSize) return;
+
+      const sizeObj = SHIRT_SIZES.find(s => s.size === tempSelectedSize);
+      const chest = sizeObj ? sizeObj.chest : '';
+      const updatedAt = new Date().toISOString();
+
+      records[activeModalPerson.id] = {
+        id: activeModalPerson.id,
+        name: activeModalPerson.name,
+        deptName: activeModalPerson.deptName,
+        size: tempSelectedSize,
+        chest: chest,
+        updatedAt: updatedAt
+      };
+
+      saveRecordsToStorage();
+      renderAll();
+
+      const personToSync = activeModalPerson;
+      const sizeToSync = tempSelectedSize;
+
+      closeModal('sizeSelectModal');
+      showToast(`บันทึกไซส์ ${sizeToSync} สำหรับ ${personToSync.name} เรียบร้อยแล้ว`);
+
+      // ส่งข้อมูลไปยัง Google Sheet ทันที
+      if (gasWebAppUrl) {
+        setSyncBadge('กำลังบันทึกลง Google Sheet...', false);
+        try {
+          await fetch(gasWebAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'saveSize',
+              sheetId: GOOGLE_SHEET_ID,
+              id: personToSync.id,
+              no: personToSync.no,
+              name: personToSync.name,
+              deptName: personToSync.deptName,
+              size: sizeToSync,
+              chest: chest,
+              updatedAt: updatedAt
+            })
+          });
+          setSyncBadge('บันทึกลง Google Sheet แล้ว', true);
+        } catch (err) {
+          console.warn('GAS Sync error:', err);
+          setSyncBadge('บันทึกในเครื่องแล้ว', true);
+        }
+      }
+    }
+
+    async function deleteSelectedPersonSize() {
+      if (!activeModalPerson) return;
+      const personToDelete = activeModalPerson;
+
+      delete records[personToDelete.id];
+      saveRecordsToStorage();
+      renderAll();
+      closeModal('sizeSelectModal');
+      showToast(`ล้างข้อมูลไซส์ของ ${personToDelete.name} แล้ว`);
+
+      if (gasWebAppUrl) {
+        try {
+          await fetch(gasWebAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'saveSize',
+              sheetId: GOOGLE_SHEET_ID,
+              id: personToDelete.id,
+              no: personToDelete.no,
+              name: personToDelete.name,
+              deptName: personToDelete.deptName,
+              size: '',
+              chest: '',
+              updatedAt: new Date().toISOString()
+            })
+          });
+        } catch (err) {
+          console.warn('GAS Delete Sync error:', err);
+        }
+      }
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Export CSV & Copy Table
+    function exportToCSV() {
+      const headers = ['ลำดับ', 'กลุ่มงาน/กลุ่มสาระฯ', 'ชื่อ-นามสกุล', 'สถานะ', 'ไซส์เสื้อ', 'รอบอก (นิ้ว)', 'เวลาที่บันทึก'];
+      const rows = ALL_STAFF.map((person, index) => {
+        const rec = records[person.id];
+        const sizeObj = rec ? SHIRT_SIZES.find(s => s.size === rec.size) : null;
+        return [
+          index + 1,
+          `"${person.deptName}"`,
+          `"${person.name}"`,
+          rec && rec.size ? 'กรอกแล้ว' : 'ยังไม่กรอก',
+          rec && rec.size ? rec.size : '-',
+          sizeObj ? sizeObj.chest : '-',
+          rec && rec.updatedAt ? new Date(rec.updatedAt).toLocaleString('th-TH') : '-'
+        ];
+      });
+
+      const stats = getStatistics();
+      rows.push([]);
+      rows.push(['สรุปจำนวนเสื้อแต่ละไซส์']);
+      SHIRT_SIZES.forEach(s => {
+        rows.push([`ไซส์ ${s.size} (อก ${s.chest}")`, `${stats.sizeCounts[s.size] || 0} ตัว`]);
+      });
+      rows.push(['รวมกรอกแล้วทั้งหมด', `${stats.completed} ตัว`]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `สรุปไซส์เสื้อแทร็คสูท_MWK_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('ดาวน์โหลดไฟล์ CSV เรียบร้อยแล้ว');
+    }
+
+    function copyTableToClipboard() {
+      const headers = ['ลำดับ', 'กลุ่มงาน/กลุ่มสาระฯ', 'ชื่อ-นามสกุล', 'สถานะ', 'ไซส์เสื้อ', 'รอบอก (นิ้ว)'];
+      const rows = ALL_STAFF.map((person, index) => {
+        const rec = records[person.id];
+        const sizeObj = rec ? SHIRT_SIZES.find(s => s.size === rec.size) : null;
+        return [
+          index + 1,
+          person.deptName,
+          person.name,
+          rec && rec.size ? 'กรอกแล้ว' : 'ยังไม่กรอก',
+          rec && rec.size ? rec.size : '',
+          sizeObj ? sizeObj.chest : ''
+        ].join('\t');
+      });
+
+      const tsv = [headers.join('\t'), ...rows].join('\n');
+      navigator.clipboard.writeText(tsv);
+      showToast('คัดลอกตารางแล้ว! นำไปกด Ctrl+V วางใน Google Sheet ได้เลย');
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const container = document.getElementById('toastContainer');
+      const msgSpan = document.getElementById('toastMessage');
+      msgSpan.textContent = message;
+      container.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        container.classList.add('hidden');
+      }, 3200);
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
+```
