@@ -50,9 +50,9 @@
 
   <!-- Top Navbar -->
   <header class="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-yellow-200 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3.5">
-        <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-300 p-1 shadow-md border border-yellow-300 flex items-center justify-center overflow-hidden shrink-0">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-20 py-2 sm:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+      <div class="flex items-center gap-2.5 sm:gap-3.5 w-full sm:w-auto min-w-0">
+        <div class="relative w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-300 p-1 shadow-md border border-yellow-300 flex items-center justify-center overflow-hidden shrink-0">
           <img
             src="https://img2.pic.in.th/logo-RGB-14ace013a990fead5.png"
             alt="MWK Logo"
@@ -60,7 +60,7 @@
             onerror="this.onerror=null;this.src='https://placehold.co/100x100/facc15/1e293b?text=MWK';"
           />
         </div>
-        <div>
+        <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-yellow-400 text-slate-900 rounded-full shadow-2xs">
               MWK Track Suit
@@ -70,9 +70,7 @@
               กำลังเชื่อมต่อ Google Sheet...
             </span>
           </div>
-          <h1 class="text-base sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-            ระบบสำรวจไซส์เสื้อแทร็คสูท (Track Suit)
-          </h1>
+          <h1 class="text-sm sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis leading-6">ระบบสำรวจไซส์เสื้อแทร็คสูท (Track Suit)</h1>
           <p class="text-xs text-slate-500 hidden sm:block">
             โรงเรียนแม่จันวิทยาคม • บันทึกและแสดงผลจาก Google Sheet แบบ Real-time
           </p>
@@ -80,12 +78,12 @@
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="flex items-center gap-2">
-        <div class="bg-yellow-100/90 p-1.5 rounded-2xl border border-yellow-200 flex items-center gap-1">
+      <div class="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full sm:w-auto">
+        <div class="bg-yellow-100/90 p-1 rounded-xl sm:p-1.5 sm:rounded-2xl border border-yellow-200 flex items-center gap-1 min-w-0">
           <button
             id="tabSurveyBtn"
             onclick="switchTab('survey')"
-            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer bg-yellow-400 text-slate-900 shadow-sm"
+            class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all cursor-pointer bg-yellow-400 text-slate-900 shadow-sm whitespace-nowrap"
           >
             <i data-lucide="shirt" class="w-4 h-4"></i>
             <span>เลือกไซส์เสื้อ</span>
@@ -93,11 +91,11 @@
           <button
             id="tabSummaryBtn"
             onclick="switchTab('summary')"
-            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer text-slate-700 hover:bg-yellow-200/60"
+            class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all cursor-pointer text-slate-700 hover:bg-yellow-200/60 whitespace-nowrap"
           >
             <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
             <span>สรุปผลข้อมูล</span>
-            <span id="navBadgeCount" class="px-1.5 py-0.2 rounded-full text-[11px] bg-yellow-300/80 text-slate-900 font-bold">
+            <span id="navBadgeCount" class="px-1.5 py-0.2 rounded-full text-[10px] sm:text-[11px] bg-yellow-300/80 text-slate-900 font-bold">
               0/136
             </span>
           </button>
@@ -106,7 +104,7 @@
         <button
           onclick="fetchFromGoogleSheet(true)"
           title="รีเฟรชข้อมูลล่าสุดจาก Google Sheet"
-          class="p-2.5 rounded-xl border bg-yellow-50 border-yellow-300 text-yellow-800 hover:bg-yellow-100 transition-all cursor-pointer"
+          class="p-2 sm:p-2.5 rounded-lg sm:rounded-xl border bg-yellow-50 border-yellow-300 text-yellow-800 hover:bg-yellow-100 transition-all cursor-pointer shrink-0"
         >
           <i id="refreshIcon" data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
@@ -114,7 +112,7 @@
         <button
           onclick="openModal('sheetModal')"
           title="ข้อมูลการเชื่อมต่อ Google Sheet"
-          class="p-2.5 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer"
+          class="p-2 sm:p-2.5 rounded-lg sm:rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer shrink-0"
         >
           <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
         </button>
@@ -181,9 +179,6 @@
         <div>
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                Real-Time Progress
-              </span>
               <h2 class="text-lg sm:text-xl font-bold text-slate-900 mt-1">
                 ภาพรวมการกรอกข้อมูลทั้งหมด
               </h2>
